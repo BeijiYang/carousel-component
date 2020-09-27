@@ -19,27 +19,77 @@ class Carousel extends Component {
       this.root.appendChild(child);
     }
 
-    let currentIndex = 0;
-    setInterval(() => {
-      const children = this.root.children;
-      const nextIndex = (currentIndex + 1) % children.length;
-      // console.log(currentIndex, nextIndex)
-      const current = children[currentIndex];
-      const next = children[nextIndex];
+    // let currentIndex = 0;
+    // setInterval(() => {
+    //   const children = this.root.children;
+    //   const nextIndex = (currentIndex + 1) % children.length;
+    //   // console.log(currentIndex, nextIndex)
+    //   const current = children[currentIndex];
+    //   const next = children[nextIndex];
 
-      next.style.transition = 'none';
-      next.style.transform = `translateX(${100 - nextIndex * 100}%)`;
+    //   next.style.transition = 'none';
+    //   next.style.transform = `translateX(${100 - nextIndex * 100}%)`;
 
-      setTimeout(() => {
-        next.style.transition = '';
-        current.style.transform = `translateX(${-100 - currentIndex * 100}%)`;
-        next.style.transform = `translateX(-${nextIndex * 100}%)`;
-        currentIndex = nextIndex;
-      }, 160);
+    //   setTimeout(() => {
+    //     next.style.transition = '';
+    //     current.style.transform = `translateX(${-100 - currentIndex * 100}%)`;
+    //     next.style.transform = `translateX(-${nextIndex * 100}%)`;
+    //     currentIndex = nextIndex;
+    //   }, 160);
 
-    }, 1500);
-
+    // }, 1500);
+    this.draggable();
     return this.root;
+  }
+
+  draggable() {
+    let position = 0;
+    this.root.addEventListener('mousedown', ({ clientX: initX }) => {
+      const drag = ({ clientX }) => {
+        const movedX = clientX - initX;
+        // todo 同时拖动了四个，两个就足够了
+        for (const child of this.root.children) {
+          child.style.transition = 'none';
+          const { width } = child.getClientRects()[0]; // 500 todo getClientRects
+          child.style.transform = `translateX(${position * width + movedX}px)`;
+        }
+      }
+      const mouseup = ({ clientX }) => {
+        const movedX = clientX - initX;
+        position += Math.round(movedX / 500);
+
+        for (const child of this.root.children) {
+          child.style.transition = '';
+          child.style.transform = `translateX(${position * 500}px)`;
+        }
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', mouseup)
+      }
+
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('mouseup', mouseup)
+    })
+
+
+
+
+    // const children = this.root.children;
+    // for (const child of children) {
+    //   child.addEventListener('mousedown', ({ clientX: initX }) => {
+    //     const drag = ({ clientX }) => {
+    //       const movedX = clientX - initX;
+    //       child.style.transform = `translateX(${movedX}px)`;
+    //     }
+    //     const mouseup = () => {
+    //       child.style.transform = `translateX(${0}px)`;
+    //       document.removeEventListener('mousemove', drag);
+    //       document.removeEventListener('mouseup', mouseup)
+    //     }
+
+    //     document.addEventListener('mousemove', drag);
+    //     document.addEventListener('mouseup', mouseup)
+    //   })
+    // }
   }
 
   mountTo(parent) {
