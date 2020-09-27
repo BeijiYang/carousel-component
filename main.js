@@ -11,7 +11,6 @@ class Carousel extends Component {
   }
 
   render() {
-    console.log(this.attributes)
     this.root = document.createElement('div');
     this.root.classList.add('carousel');
     for (const src of this.attributes.src) {
@@ -19,6 +18,27 @@ class Carousel extends Component {
       child.style.backgroundImage = `url(${src})`;
       this.root.appendChild(child);
     }
+
+    let currentIndex = 0;
+    setInterval(() => {
+      const children = this.root.children;
+      const nextIndex = (currentIndex + 1) % children.length;
+      // console.log(currentIndex, nextIndex)
+      const current = children[currentIndex];
+      const next = children[nextIndex];
+
+      next.style.transition = 'none';
+      next.style.transform = `translateX(${100 - nextIndex * 100}%)`;
+
+      setTimeout(() => {
+        next.style.transition = '';
+        current.style.transform = `translateX(${-100 - currentIndex * 100}%)`;
+        next.style.transform = `translateX(-${nextIndex * 100}%)`;
+        currentIndex = nextIndex;
+      }, 160);
+
+    }, 1500);
+
     return this.root;
   }
 
@@ -33,4 +53,3 @@ const urlOf = id => `https://picsum.photos/id/${id}/500/300`;
 const a = <Carousel src={ids.map(urlOf)} />
 
 a.mountTo(document.body);
-
