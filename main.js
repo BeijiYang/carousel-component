@@ -17,15 +17,29 @@ function createElement(type, attributes, ...children) {
   return element;
 }
 
+class Watch {
+  constructor() {
+    this.root = document.createElement('div');
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value);
+  }
+  appendChild(child) {
+    this.root.appendChild(child);
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
+}
 
 
-const a = <div id="aa">
+const a = <Watch id="aa">
   <span>Hey</span>
   ~
-</div>
+</Watch>
 
-document.body.appendChild(a);
-
+// document.body.appendChild(a);
+a.mountTo(document.body);
 
 // var a = createElement("div", {
 //     id: "aa"
