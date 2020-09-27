@@ -1,6 +1,6 @@
 function createElement(type, attributes, ...children) {
   const element = typeof type === 'string'
-    ? document.createElement(type)
+    ? new ElementWrapper(type)
     : new type;
 
   for (const attr in attributes) {
@@ -9,7 +9,7 @@ function createElement(type, attributes, ...children) {
 
   for (let child of children) {
     if (typeof child === 'string') {
-      child = document.createTextNode(child);
+      child = new TextNodeWrapper(child);
     }
     element.appendChild(child);
   }
@@ -32,19 +32,37 @@ class Watch {
   }
 }
 
+class ElementWrapper {
+  constructor(type) {
+    this.root = document.createElement(type);
+  }
+  setAttribute(name, value) {
+    this.root.setAttribute(name, value);
+  }
+  appendChild(child) {
+    // this.root.appendChild(child);
+    child.mountTo(this.root);
+  }
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
+}
 
-const a = <Watch id="aa">
+class TextNodeWrapper {
+  constructor(type) {
+    this.root = document.createTextNode(type);
+  }
+
+  mountTo(parent) {
+    parent.appendChild(this.root);
+  }
+}
+
+const a = <div id="aa">
   <span>Hey</span>
   ~
-</Watch>
+</div>
 
-// document.body.appendChild(a);
+
 a.mountTo(document.body);
 
-// var a = createElement("div", {
-//     id: "aa"
-//   },
-//   createElement("span", null),
-//   createElement("span", null),
-//   createElement("span", null)
-// );
