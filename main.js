@@ -45,23 +45,43 @@ class Carousel extends Component {
   draggable() {
     let position = 0;
     this.root.addEventListener('mousedown', ({ clientX: initX }) => {
+
       const drag = ({ clientX }) => {
+        const children = this.root.children;
         const movedX = clientX - initX;
-        // todo 同时拖动了四个，两个就足够了
-        for (const child of this.root.children) {
-          child.style.transition = 'none';
-          const { width } = child.getClientRects()[0]; // 500 todo getClientRects
-          child.style.transform = `translateX(${position * width + movedX}px)`;
+        // 当前元素的位置
+        const current = position - (movedX - movedX % 500) / 500
+        // 不去算往左还是往右，把 -1 和 1 都加上。即把当前元素，与其两边的元素都移动到正确位置上去
+        for (const offset of [-1, 0, 1]) {
+          const pos = current + offset;
+          pos = (pos + children.length) % children.length; // 四个元素，0 1 2 3。0 的前一个是 3。这个计算就是把 -1 变成 3， 把 -2 变成 2。用取余处理循环的小技巧。
+          // console.log(pos)
+          children[pos].style.transition = 'none';
+          children[pos].style.transform = `translateX(${-pos * 500 + (offset * 500) + (movedX % 500)}px)`;
         }
+        // // todo 同时拖动了四个，两个就足够了
+        // for (const child of children) {
+        //   child.style.transition = 'none';
+        //   const { width } = child.getClientRects()[0]; // 500 todo getClientRects
+        //   child.style.transform = `translateX(${position * width + movedX}px)`;
+        // }
       }
       const mouseup = ({ clientX }) => {
+        const children = this.root.children;
         const movedX = clientX - initX;
-        position += Math.round(movedX / 500);
+        position -= Math.round(movedX / 500);
 
-        for (const child of this.root.children) {
-          child.style.transition = '';
-          child.style.transform = `translateX(${position * 500}px)`;
+        for (const offset of [0, -Math.sign(Math.round(movedX / 500 - movedX + 250 * Math.sign(movedX)))]) { // sign 取符号；x / 500 - x 算方向; + 250 * 符号，看有没有超过半个图片长度  
+          const pos = position + offset;
+          pos = (pos + children.length) % children.length;
+
+          children[pos].style.transition = '';
+          children[pos].style.transform = `translateX(${-pos * 500 + offset * 500}px)`;
         }
+        // for (const child of this.root.children) {
+        //   // child.style.transition = '';
+        //   child.style.transform = `translateX(${-position * 500}px)`;
+        // }
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('mouseup', mouseup)
       }
