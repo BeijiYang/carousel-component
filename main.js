@@ -10,12 +10,23 @@ const a = <Carousel src={ids.map(urlOf)} />
 a.mountTo(document.body);
 
 const tl = new Timeline();
-tl.add(new Animation(
+
+window.tl = tl;
+window.animation = new Animation(
   { set a(v) { console.log(v) } },
   'a',
   0,
   100,
   1000,
   null
-))
+);
+
+// tl.add(new Animation(
+//   { set a(v) { console.log(v) } },
+//   'a',
+//   0,
+//   100,
+//   1000,
+//   null
+// ))
 tl.start();
