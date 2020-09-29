@@ -1,15 +1,21 @@
 <head>
   <style>
-    .block {
+    .block,
+    .test {
       width: 100px;
       height: 100px;
       background-color: olive;
+    }
+
+    .test {
+      transition: transform ease 2s;
     }
   </style>
 </head>
 
 <body>
   <div class="block"></div>
+  <div class="test"></div>
   <button class='pause-btn'>pause</button>
   <button class='resume-btn'>resume</button>
 </body>
