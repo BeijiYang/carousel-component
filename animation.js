@@ -63,19 +63,29 @@ export class Timeline {
 
 export class Animation {
   // 属性动画参数
-  constructor(object, property, startValue, endValue, duration, delay, timingFunction, template) {
+  constructor(
+    object,
+    property,
+    startValue,
+    endValue,
+    duration,
+    delay,
+    timingFunction,
+    template
+  ) {
     this.object = object;
     this.property = property;
     this.startValue = startValue;
     this.endValue = endValue;
     this.duration = duration;
     this.delay = delay;
-    this.timingFunction = timingFunction;
-    this.template = template;
+    this.timingFunction = timingFunction || (val => val); // linear
+    this.template = template || (val => val);
   }
 
   receive(time) {
     const range = this.endValue - this.startValue;
-    this.object[this.property] = this.template(this.startValue + range * (time / this.duration)); // 均匀变化
+    const progress = this.timingFunction(time / this.duration);
+    this.object[this.property] = this.template(this.startValue + range * progress); // 均匀变化
   }
 }
