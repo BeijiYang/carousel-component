@@ -7,11 +7,15 @@ const PAUSE_TIME = Symbol('pause-time');
 
 export class Timeline {
   constructor() {
+    this.status = 'Inited';
     this[ANIMATIONS] = new Set(); // animation 的队列
     this[START_TIME] = new Map();
   }
 
   start() {
+    if (this.status !== 'Inited') return;
+
+    this.status = 'Started';
     const startTime = Date.now();
     this[PAUSE_TIME] = 0;
 
@@ -38,17 +42,23 @@ export class Timeline {
   }
 
   pause() {
+    if (this.status !== 'Started') return;
+
+    this.status = 'Paused';
     this[PAUSE_START] = Date.now();
     cancelAnimationFrame(this[TICK_HANDLER]);
   }
 
   resume() {
+    if (this.status !== 'Paused') return;
+    this.status = 'Started';
     this[PAUSE_TIME] += (Date.now() - this[PAUSE_START]);
     this[TICK]();
   }
 
   reset() {
     this.pause();
+    this.status = 'Inited';
     this[ANIMATIONS] = new Set();
     this[START_TIME] = new Map();
     this[PAUSE_TIME] = 0;
