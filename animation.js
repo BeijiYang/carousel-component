@@ -48,7 +48,12 @@ export class Timeline {
   }
 
   reset() {
-
+    this.pause();
+    this[ANIMATIONS] = new Set();
+    this[START_TIME] = new Map();
+    this[PAUSE_TIME] = 0;
+    this[PAUSE_START] = 0;
+    this[TICK_HANDLER] = null;
   }
 
   // 把 animation 添加进 timeline; startTime 可手动设置一个 delay 的值
