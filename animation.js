@@ -20,14 +20,16 @@ export class Timeline {
 
       for (const animation of this[ANIMATIONS]) {
         const elapsedTime = (this[START_TIME].get(animation) < startTime)
-          ? now - startTime - this[PAUSE_TIME]
-          : now - this[START_TIME].get(animation) - this[PAUSE_TIME];
+          ? now - startTime - this[PAUSE_TIME] - animation.delay
+          : now - this[START_TIME].get(animation) - this[PAUSE_TIME] - animation.delay;
 
         if (elapsedTime > animation.duration) {
           this[ANIMATIONS].delete(animation);
           elapsedTime = animation.duration; // 当 time 大于 duration，保证 animation receive 到的最后的 time 不超过 duration。
         }
-        animation.receive(elapsedTime);  // 接收一个相对的时间，目前距离开始时过了多久
+        if (elapsedTime > 0) {
+          animation.receive(elapsedTime);  // 接收一个相对的时间，目前距离开始时过了多久
+        }
       }
 
       this[TICK_HANDLER] = requestAnimationFrame(this[TICK]);

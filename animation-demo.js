@@ -11,7 +11,7 @@ timeline.add(new Animation(
   0,
   500,
   2000,
-  0,
+  1000,
   null,
   val => `translateX(${val}px)`,
 ));
