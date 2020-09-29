@@ -2,6 +2,8 @@ const TICK = Symbol('tick'); // 利用 Symbol 的唯一性确保私有，外部�
 const TICK_HANDLER = Symbol('tick-handler');
 const ANIMATIONS = Symbol('animations');
 const START_TIME = Symbol('start-time');
+const PAUSE_START = Symbol('pause-start');
+const PAUSE_TIME = Symbol('pause-time');
 
 export class Timeline {
   constructor() {
@@ -11,14 +13,15 @@ export class Timeline {
 
   start() {
     const startTime = Date.now();
+    this[PAUSE_TIME] = 0;
 
     this[TICK] = () => {
       const now = Date.now(); // 因 Date.now() 时刻变化，用变量存下这个值。
 
       for (const animation of this[ANIMATIONS]) {
         const elapsedTime = (this[START_TIME].get(animation) < startTime)
-          ? now - startTime
-          : now - this[START_TIME].get(animation);
+          ? now - startTime - this[PAUSE_TIME]
+          : now - this[START_TIME].get(animation) - this[PAUSE_TIME];
 
         if (elapsedTime > animation.duration) {
           this[ANIMATIONS].delete(animation);
@@ -27,17 +30,19 @@ export class Timeline {
         animation.receive(elapsedTime);  // 接收一个相对的时间，目前距离开始时过了多久
       }
 
-      requestAnimationFrame(this[TICK]);
+      this[TICK_HANDLER] = requestAnimationFrame(this[TICK]);
     }
     this[TICK]();
   }
 
   pause() {
-
+    this[PAUSE_START] = Date.now();
+    cancelAnimationFrame(this[TICK_HANDLER]);
   }
 
   resume() {
-
+    this[PAUSE_TIME] += (Date.now() - this[PAUSE_START]);
+    this[TICK]();
   }
 
   reset() {
@@ -56,7 +61,7 @@ export class Timeline {
 
 export class Animation {
   // 属性动画参数
-  constructor(object, property, startValue, endValue, duration, delay, timingFunction) {
+  constructor(object, property, startValue, endValue, duration, delay, timingFunction, template) {
     this.object = object;
     this.property = property;
     this.startValue = startValue;
@@ -64,10 +69,11 @@ export class Animation {
     this.duration = duration;
     this.delay = delay;
     this.timingFunction = timingFunction;
+    this.template = template;
   }
 
   receive(time) {
     const range = this.endValue - this.startValue;
-    this.object[this.property] = this.startValue + range * (time / this.duration); // 均匀变化
+    this.object[this.property] = this.template(this.startValue + range * (time / this.duration)); // 均匀变化
   }
 }
