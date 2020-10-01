@@ -37,15 +37,15 @@ element.addEventListener('mousedown', evt => {
     contexts.delete(`mouse${1 << evt.button}`);
 
     if (evt.buttons === 0) { // 判断是否还有 key 在，当 buttons 完全空了？等于 0 了。
-      element.removeEventListener('mousemove', mousemove);
-      element.removeEventListener('mouseup', mouseup);
+      document.removeEventListener('mousemove', mousemove);
+      document.removeEventListener('mouseup', mouseup);
       isListeningMouse = false;
     }
 
   }
   if (!isListeningMouse) {
-    element.addEventListener('mousemove', mousemove);
-    element.addEventListener('mouseup', mouseup);
+    document.addEventListener('mousemove', mousemove);
+    document.addEventListener('mouseup', mouseup);
     isListeningMouse = true;
   }
 });
@@ -144,6 +144,7 @@ const end = (point, context) => {
   const { clientX, clientY } = point;
   if (context.isTap) {
     console.log('tap');
+    dispatch('tap', {});
     clearTimeout(context.handler);
   }
   if (context.isPan) {
@@ -161,3 +162,14 @@ const cancel = (point, context) => {
 
 
 
+
+
+// dispatch event
+function dispatch(type, properties) {
+  const event = new Event(type);
+  console.log(event);
+  for (const name in properties) {
+    event[name] = properties[name];
+  }
+  element.dispatchEvent(event);
+}
