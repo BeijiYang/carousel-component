@@ -51,19 +51,71 @@ element.addEventListener('touchcancel', evt => {
   }
 })
 
+/**
+ * start 时关心三件事：
+ * 1.是否 end；
+ * 2.是否移动了10px，形成 pan；
+ * 3.是否过了0.5s，形成 press；
+ */
+let handler = null;
+let isPan = false;
+let initX, initY;
+let isTap = true;
+let isPress = false;
+
 const start = (point) => {
   const { clientX, clientY } = point;
-  console.log('start', clientX, clientY)
+  initX = clientX;
+  initY = clientY;
+
+  isTap = true; // 默认是点击
+  isPan = false;
+  isPress = false;
+
+  handler = setTimeout(() => { // 判断是否是长按
+    console.log('press');
+    isPress = true;
+    isTap = false;
+    isPan = false;
+    handler = null;
+  }, 500);
 }
 const move = (point) => {
   const { clientX, clientY } = point;
-  console.log('move', clientX, clientY)
+  const movedX = clientX - initX;
+  const movedY = clientY - initY;
+
+  // 判断是否是拖动（移动距离大于 10 px）
+  if (!isPan && (movedX ** 2 + movedY ** 2 > 100)) {
+    isPan = true;
+    isTap = false;
+    isPress = false;
+    console.log('pan start');
+    clearTimeout(handler);
+  }
+
+  if (isPan) {
+    console.log(movedX, movedY);
+    console.log('isPan')
+  }
+
+  // console.log('move', clientX, clientY)
 }
 const end = (point) => {
   const { clientX, clientY } = point;
-  console.log('end', clientX, clientY)
+  if (isTap) {
+    console.log('tap');
+    clearTimeout(handler);
+  }
+  if (isPan) {
+    console.log('pan end');
+  }
+  if (isPress) {
+    console.log('press end');
+  }
 }
 const cancel = (point) => {
   const { clientX, clientY } = point;
   console.log('cancel', clientX, clientY)
+  clearTimeout(handler);
 }
