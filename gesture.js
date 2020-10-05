@@ -107,9 +107,16 @@ const start = (point, context) => {
   context.initX = clientX;
   context.initY = clientY;
 
+  context.points = [{
+    time: Date.now(),
+    x: point.clientX,
+    y: point.clientY
+  }];
+
   context.isTap = true; // 默认是点击
   context.isPan = false;
   context.isPress = false;
+  context.isFlick = false;
 
   context.handler = setTimeout(() => { // 判断是否是长按
     console.log('press');
@@ -138,6 +145,15 @@ const move = (point, context) => {
     console.log('isPan')
   }
 
+  // 只存半秒内的点，这样用 points 中存储的点算出的就总是最新的一段速度
+  context.points = context.points.filter(point => Date.now() - point.time < 500);
+
+  context.points.push({
+    time: Date.now(),
+    x: point.clientX,
+    y: point.clientY
+  });
+
   // console.log('move', clientX, clientY)
 }
 const end = (point, context) => {
@@ -153,6 +169,17 @@ const end = (point, context) => {
   if (context.isPress) {
     console.log('press end');
   }
+  context.points = context.points.filter(point => Date.now() - point.time < 500);
+  let speed;
+  if (!context.points.length) {
+    speed = 0;
+
+  } else {
+    const distance = Math.sqrt((point.clientX - context.points[0].x) ** 2 + (point.clientY - context.points[0].y) ** 2);
+    speed = distance / (Date.now() - context.points[0].time);
+  }
+  // 当速度大于 1.5 像素每毫秒，判定为 flick
+  context.isFlick = speed > 1.5;
 }
 const cancel = (point, context) => {
   const { clientX, clientY } = point;
@@ -167,7 +194,6 @@ const cancel = (point, context) => {
 // dispatch event
 function dispatch(type, properties) {
   const event = new Event(type);
-  console.log(event);
   for (const name in properties) {
     event[name] = properties[name];
   }
