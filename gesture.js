@@ -124,6 +124,7 @@ const start = (point, context) => {
     context.isTap = false;
     context.isPan = false;
     context.handler = null;
+    dispatch('press', {});
   }, 500);
 }
 const move = (point, context) => {
@@ -138,6 +139,7 @@ const move = (point, context) => {
     context.isPress = false;
     console.log('pan start');
     clearTimeout(context.handler);
+    dispatch('pan', {});
   }
 
   if (context.isPan) {
@@ -173,13 +175,15 @@ const end = (point, context) => {
   let speed;
   if (!context.points.length) {
     speed = 0;
-
   } else {
     const distance = Math.sqrt((point.clientX - context.points[0].x) ** 2 + (point.clientY - context.points[0].y) ** 2);
     speed = distance / (Date.now() - context.points[0].time);
   }
   // 当速度大于 1.5 像素每毫秒，判定为 flick
   context.isFlick = speed > 1.5;
+  if (context.isFlick) {
+    dispatch('flick', {});
+  }
 }
 const cancel = (point, context) => {
   const { clientX, clientY } = point;
